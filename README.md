@@ -179,7 +179,7 @@ Este repositorio es para comprobar el funcionamiento de una plantilla de Docker-
 
 
 
-#Añadimos el código para lanzar *_prestashop_* con bitnami.
+# Añadimos el código para lanzar *_prestashop_* con bitnami.
 
     ```
         version: '3.3'
@@ -262,6 +262,6 @@ Este repositorio es para comprobar el funcionamiento de una plantilla de Docker-
 
 
 
-##Funcionamiento.
+## Funcionamiento.
 
-    ![](images/cap_ps.png)
+![](images/cap_ps.png)
