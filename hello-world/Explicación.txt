@@ -1,0 +1,35 @@
+-- La principal diferencia que podemos encontrar diferentes comandos que pueden generar capas como son:
+ 1. ADD
+ 2. RUN
+ 3. COPY
+
+-- Nosotros para poder construir las capas hacemos uso del comando entrypoint y cmd.
+
+-- CMD : son los parametros de entrada de entrada. La lista recomendada de usarlo es a través de una lista de parámetros.
+-- Si se encuentra solo el entrypoint ejeucta solo el comadno de entrada.
+-- Si están los dos se ejecutan el entrypoint y después del CMD.
+
+-- WORKDIR: Este comando nos permite indicar en que directorio queremos que trabaje. 
+
+-- LABEL: Te permite indicar etiquetas dentro de la versión de la imagen. Son etiquetas internas.
+
+
+#-----------------------------------------#--------------------------------------------------------------------#
+
+Para construir la imagen lo hacemos de la siguiente manera: 
+--> Desde el dockerfile lo pasamos a imagen haciendo uso de docker build. 
+--> Desde imagen lo pasamos a contenedor haciendo uso de docker run.
+
+
+1. Paso buscamos nuestro directorio y hacemos uso del siguiente comando para convertirlo en imagen.
+
+-- docker build -t hello . ( Se puede poner la ruta absolutamente como en el pwd )
+
+El directorio en el que estamos es el siguiente: /home/ubuntu/Example_Docker-Compose/hello-world
+
+2. Para comprobar que se ha creado correctamente accedemos a docker images y comprobamos que se ha creado.
+
+-- docker images ls -la 
+
+3. Para ejecutar la imagen hacemos uso de: --> docker run -it [Nombre de la imagen]
+
