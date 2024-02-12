@@ -1,69 +1,55 @@
-version: '3.4'
+version: '3.3'
 
-#----------------------MYSQL-----------------
 services:
-  mysql:
-    image: mysql:8.0
-    command: --default-authentication-plugin=mysql_native_password
-    #ports: 
-      #- 3306:3306
-    environment: 
+  mariadb:
+    image: mariadb:10.4
+    environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-    volumes: 
-      - mysql_data:/var/lib/mysql
-    networks: 
-      - backend-network
     restart: always
-    #Configuramos la seguridad
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - backend-network
     security_opt:
       - seccomp:unconfined
 
-#----------------PHPMYADMIN--------------
   phpmyadmin:
-    image: phpmyadmin
+    image: phpmyadmin/phpmyadmin
     ports:
       - 8080:80
-    environment: 
-    #Declaramos el host para que utilice MYQSL.
-      - PMA_HOST=mysql
-    networks: 
+    environment:
+      - PMA_HOST=mariadb
+    networks:
       - backend-network
       - frontend-network
     restart: always
-    depends_on: 
-      - mysql
+    depends_on:
+      - mariadb
 
-
-#-------PRESTASHOP----------
   prestashop:
     image: bitnami/prestashop:1.7
     environment:
       - PRESTASHOP_HOST=${DOMAIN}
       - PRESTASHOP_ENABLE_HTTPS=yes
-      - PRESTASHOP_DATABASE_HOST=${PRESTASHOP_DATABASE_HOST}
+      - PRESTASHOP_EMAIL=${PRESTASHOP_EMAIL}
+      - PRESTASHOP_FIRST_NAME=${PRESTASHOP_FIRST_NAME}
+      - PRESTASHOP_PASSWORD=${PRESTASHOP_PASSWORD}
+      - PRESTASHOP_DATABASE_HOST=mariadb
       - PRESTASHOP_DATABASE_PASSWORD=${PRESTASHOP_DATABASE_PASSWORD}
       - PRESTASHOP_DATABASE_USER=${PRESTASHOP_DATABASE_USER}
       - PRESTASHOP_DATABASE_NAME=${PRESTASHOP_DATABASE_NAME}
-      - PRESTASHOP_FIRST_NAME=${PRESTASHOP_FIRST_NAME}
-      - PRESTASHOP_LAST_NAME=${PRESTASHOP_FIRST_NAME}
-      - PRESTASHOP_PASSWORD=${PRESTASHOP_PASSWORD}
-      - PRESTASHOP_EMAIL=${PRESTASHOP_EMAIL}
-
     volumes:
       - prestashop_data:/bitnami/prestashop
     restart: always
     networks:
       - backend-network
       - frontend-network
-
     depends_on:
-      - mysql
+      - mariadb
 
-
-#-----------------DOMINIO-------------------
   https-portal:
     image: steveltn/https-portal:1
     ports:
@@ -71,19 +57,18 @@ services:
       - 443:443
     restart: always
     environment:
-      DOMAINS: '${DOMAIN}-> http://prestashop:8080'
+      DOMAINS: '${DOMAIN} -> http://prestashop:8080'
       STAGE: 'production' # Don't use production until staging works
-      # FORCE_RENEW: 'true'
     networks:
       - frontend-network
     volumes:
       - ssl_certs_data:/var/lib/https-portal
 
 volumes:
-  mysql_data:
+  mariadb_data:
   prestashop_data:
   ssl_certs_data:
 
-networks: 
+networks:
   backend-network:
   frontend-network:

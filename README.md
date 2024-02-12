@@ -176,3 +176,92 @@ Este repositorio es para comprobar el funcionamiento de una plantilla de Docker-
 - También desde la *_ip elástica_* podemos ver el `phpmyadmin`.
 
     ![](images/cap5.png)
+
+
+
+#Añadimos el código para lanzar *_prestashop_* con bitnami.
+
+    ```
+        version: '3.3'
+
+    services:
+    mariadb:
+        image: mariadb:10.4
+        environment:
+        - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+        - MYSQL_DATABASE=${MYSQL_DATABASE}
+        - MYSQL_USER=${MYSQL_USER}
+        - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+        restart: always
+        volumes:
+        - mariadb_data:/var/lib/mysql
+        networks:
+        - backend-network
+        security_opt:
+        - seccomp:unconfined
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        ports:
+        - 8080:80
+        environment:
+        - PMA_HOST=mariadb
+        networks:
+        - backend-network
+        - frontend-network
+        restart: always
+        depends_on:
+        - mariadb
+
+    prestashop:
+        image: bitnami/prestashop:1.7
+        environment:
+        - PRESTASHOP_HOST=${DOMAIN}
+        - PRESTASHOP_ENABLE_HTTPS=yes
+        - PRESTASHOP_EMAIL=${PRESTASHOP_EMAIL}
+        - PRESTASHOP_FIRST_NAME=${PRESTASHOP_FIRST_NAME}
+        - PRESTASHOP_PASSWORD=${PRESTASHOP_PASSWORD}
+        - PRESTASHOP_DATABASE_HOST=mariadb
+        - PRESTASHOP_DATABASE_PASSWORD=${PRESTASHOP_DATABASE_PASSWORD}
+        - PRESTASHOP_DATABASE_USER=${PRESTASHOP_DATABASE_USER}
+        - PRESTASHOP_DATABASE_NAME=${PRESTASHOP_DATABASE_NAME}
+        volumes:
+        - prestashop_data:/bitnami/prestashop
+        restart: always
+        networks:
+        - backend-network
+        - frontend-network
+        depends_on:
+        - mariadb
+
+    https-portal:
+        image: steveltn/https-portal:1
+        ports:
+        - 80:80
+        - 443:443
+        restart: always
+        environment:
+        DOMAINS: '${DOMAIN} -> http://prestashop:8080'
+        STAGE: 'production' # Don't use production until staging works
+        networks:
+        - frontend-network
+        volumes:
+        - ssl_certs_data:/var/lib/https-portal
+
+    volumes:
+    mariadb_data:
+    prestashop_data:
+    ssl_certs_data:
+
+    networks:
+    backend-network:
+    frontend-network:
+
+
+    ```
+
+
+
+##Funcionamiento.
+
+    ![](images/cap_ps.png)
